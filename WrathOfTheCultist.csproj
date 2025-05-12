@@ -8,7 +8,11 @@
 		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 	</PropertyGroup>
 
+
 	<!-- References -->
+	<PropertyGroup>
+		
+	</PropertyGroup>
 	<ItemGroup>
 		
 	</ItemGroup>
