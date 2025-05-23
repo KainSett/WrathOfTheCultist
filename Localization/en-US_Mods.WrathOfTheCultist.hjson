@@ -1,1 +1,37 @@
-Projectiles.ShadowflameSpell.DisplayName: Shadowflame Spell
+Projectiles: {
+	ShadowflameSpell.DisplayName: Shadowflame Spell
+	EldritchBarrier.DisplayName: Eldritch Barrier
+}
+
+Items: {
+	EldritchShield: {
+		DisplayName: Eldritch Shield
+		Tooltip:
+			'''
+			Grants a barrier that blocks up to {0} damage, scales with magic power
+			The barrier starts recharging after 5 seconds of not taking any damage
+			'Feels weird man'
+			'''
+	}
+}
+
+Configs: {
+	ClientConfig: {
+		DisplayName: Client Config
+
+		EldritchShieldUIDraggable: {
+			Label: Eldritch Shield UI Draggable
+			Tooltip: Makes the Eldritch Shield's ui draggable. Don't forget to turn this off after you're done!
+		}
+
+		EldritchShieldUIPosition: {
+			Label: Eldritch Shield UI Position
+			Tooltip: The position of Eldritch Shield's ui, relatively to screen coordinates
+		}
+
+		EldritchShieldUIColor: {
+			Label: Eldritch Shield UI Color
+			Tooltip: Sets the color of the filler in Eldritch Shield's ui to a new value
+		}
+	}
+}

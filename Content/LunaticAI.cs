@@ -4,6 +4,9 @@
 
 
 
+using System.Linq;
+using Terraria.GameContent.ItemDropRules;
+
 namespace WrathOfTheCultist.Content;
 
 public class LunaticAI : GlobalNPC
@@ -13,6 +16,12 @@ public class LunaticAI : GlobalNPC
     public override bool AppliesToEntity(NPC entity, bool lateInstantiation)
     {
         return entity.type == CultistBoss;
+    }
+
+    public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
+    {
+        if (npc.type == CultistBoss)
+            npcLoot.Add(ItemDropRule.ByCondition(new Conditions.IsExpert(), ModContent.ItemType<EldritchShield>()));
     }
 
     public enum State
@@ -75,7 +84,7 @@ public class LunaticAI : GlobalNPC
             if (roll > State.Balls)
                 roll = State.Balls;
 
-            state = roll;
+            state = roll;   
 
             anim = LunaticAnimation.Anim.Fly;
 
@@ -86,6 +95,8 @@ public class LunaticAI : GlobalNPC
             }
 
             targetPosition = Vector2.Zero;
+
+            npc.direction = rand.Next(2) * 2 - 1;
 
             npc.ai[1] = 0;
 
@@ -173,6 +184,9 @@ public class LunaticAI : GlobalNPC
                 break;
         }
 
+        if (player.All(p => !p.active || p == null || p.respawnTimer > 0))
+            npc.life = 0;
+
         return false;
     }
 
@@ -191,12 +205,28 @@ public class LunaticAI : GlobalNPC
 
             if (targetPosition.Distance(npc.Center) <= 400)
                 targetPosition += npc.Center.DirectionTo(new Vector2(spawnTileX, spawnTileY)) * 500;
+
+
+            Player player = null;
+            var distance = 0f;
+            foreach (var p in ActivePlayers)
+            {
+                if (targetPosition.Distance(npc.Center) <= distance || distance == 0)
+                { 
+                    player = p;
+                    distance = targetPosition.Distance(npc.Center); 
+                }
+            }
+
+            if (player != null && player.Center.Distance(targetPosition) > 800)
+                targetPosition = player.Center + player.Center.DirectionTo(targetPosition) * 800;
+
         }
 
         if (npc.ai[1] > 100)
         {
 
-            if (npc.AI_AttemptToFindTeleportSpot(ref targetPosition, (int)targetPosition.ToTileCoordinates().X, (int)targetPosition.ToTileCoordinates().Y, teleportInAir: true, solidTileCheckFluff: 0))
+            if (npc.AI_AttemptToFindTeleportSpot(ref targetPosition, (int)targetPosition.ToTileCoordinates().X, (int)targetPosition.ToTileCoordinates().Y, teleportInAir: true, solidTileCheckFluff: 5))
             {
                 npc.Teleport(targetPosition.ToWorldCoordinates());
                 state = State.Stationary;
@@ -376,7 +406,7 @@ public class LunaticAI : GlobalNPC
 
         if (npc.ai[1] == 60)
         {
-            NewProjectile(npc.GetSource_FromAI("Lightning spell"), npc.Center, Vector2.Zero, CultistBossLightningOrb, 50, 4);
+            NewProjectile(npc.GetSource_FromAI("Lightning spell"), npc.Center - new Vector2(0, 150), Vector2.Zero, CultistBossLightningOrb, 50, 4);
         }
 
         if (npc.ai[1] > 300)
@@ -416,7 +446,7 @@ public class LunaticAI : GlobalNPC
         var rect = LunaticAnimation.FindFrame(ref anim, ref npc.frameCounter);
 
 
-        spriteBatch.Draw(texture.Value, npc.position - new Vector2(npc.width / 2, npc.height / 6) - screenPos, rect, drawColor);
+        spriteBatch.Draw(texture.Value, npc.position - new Vector2(npc.width / 2, npc.height / 6) - screenPos, rect, drawColor, npc.rotation, npc.Size / 2, npc.scale, npc.direction == 1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
 
         return false;
     }
@@ -1214,15 +1244,5 @@ public class FireballsSpell : GlobalProjectile
     public override bool PreAI(Projectile projectile)
     {
         return base.PreAI(projectile);
-    }
-}
-
-public class LightningSpell : GlobalProjectile
-{
-    public override bool InstancePerEntity => true;
-
-    public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
-    {
-        return entity.type == CultistBossLightningOrbArc;
     }
 }
